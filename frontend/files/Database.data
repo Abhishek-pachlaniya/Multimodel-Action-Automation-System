@@ -1,0 +1,145 @@
+Abhishek Pachlaniya : How are you?
+mark42 : I'm functioning properly.
+Abhishek Pachlaniya : Try it.
+mark42 : I'm doing well.
+Abhishek Pachlaniya : You can't even fit in the office.
+mark42 : I'm a virtual AI assistant, I don't have a physical presence.
+Abhishek Pachlaniya : Hee can you hear me?
+mark42 : I can understand and respond to your text.
+Abhishek Pachlaniya : Hello.
+mark42 : Hello.
+Abhishek Pachlaniya : How are you?
+mark42 : I'm functioning properly.
+Abhishek Pachlaniya : Can you open beach buggy 2?
+mark42 : I'm a text-based AI, I don't have the capability to open or access external applications or games like Beach Buggy 2.
+Abhishek Pachlaniya : But this is inside the.
+mark42 : I'm still a text-based AI, I don't have the ability to interact with or open external applications or games, regardless of the context.
+Abhishek Pachlaniya : Sister's dick again.
+mark42 : I don't understand the context of your statement. Is there something else I can help you with?
+Abhishek Pachlaniya : Motherfucker.
+mark42 : That language is not necessary, let's keep the conversation respectful.
+Abhishek Pachlaniya : Motherfucker fuck you.
+mark42 : I'm here to help, but I won't engage in a conversation that involves profanity or personal attacks. Let's start fresh and be respectful.
+Abhishek Pachlaniya : What is chauth coming?
+mark42 : It seems you're referring to a Hindu festival or occasion. Could you please provide more context or specify which "Chauth" you are referring to?
+Abhishek Pachlaniya : Did you know about ajay thakur.
+mark42 : Yes, I have information about Ajay Thakur. He is an Indian kabaddi player, born on May 1, 1986, in Himachal Pradesh, India. Ajay Thakur has been a prominent figure in Indian kabaddi, and he has helped the Indian team win several titles, including the 2016 World Cup. He is also a former captain of the Indian kabaddi team. Would you like to know more about his achievements or career?
+Abhishek Pachlaniya : Who i am?
+mark42 : You are Abhishek Pachlaniya.
+Abhishek Pachlaniya : What's my date of birth?
+mark42 : I don't have that information.
+Abhishek Pachlaniya : But i told you the time.
+mark42 : You told me the current date, which is March 1, 2026, but not your birthdate.
+Abhishek Pachlaniya : Hee bro can you hear me?
+mark42 : I can understand and respond to your text, but I don't have the ability to hear you in the classical sense, as I'm a text-based AI.
+Abhishek Pachlaniya : Basically what i was doing was downloading the installed app?
+mark42 : It seems like you were trying to download an already installed app.
+Abhishek Pachlaniya : Hello.
+mark42 : Hello.
+Abhishek Pachlaniya : Guitar.
+mark42 : A musical instrument.
+Abhishek Pachlaniya : People in it.
+mark42 : You're referring to the people involved with the guitar, such as guitarists or musicians.
+Abhishek Pachlaniya : Why is it searching by default? you should open chrome?
+mark42 : I'm a text-based AI, I don't have the ability to open or interact with external applications like Chrome.
+Abhishek Pachlaniya : Send a message to ajay thakur.
+mark42 : I'm a large language model, I don't have the ability to send direct messages to individuals, including Ajay Thakur.
+Abhishek Pachlaniya : Hey you sister's dicks we will make you do all this.
+mark42 : I'm here to provide helpful and respectful responses. I don't engage with language that is derogatory or abusive. Let's keep the conversation respectful and focused on a topic or question you'd like to discuss.
+Abhishek Pachlaniya : Message ajay thakur.
+mark42 : I'm not capable of sending direct messages to individuals, including Ajay Thakur.
+Abhishek Pachlaniya : Sister's dicks.
+mark42 : I won't engage in a conversation that involves derogatory language. Let's start fresh and have a respectful conversation.
+Abhishek Pachlaniya : Sister's dick is translating youtube search again and again.
+mark42 : It seems like you're experiencing an issue with a YouTube search feature. If you could provide more context or details about the problem, I'll try to help you troubleshoot or find a solution.
+Abhishek Pachlaniya : Ok i'm searching youtube.
+mark42 : What are you searching for on YouTube?
+Abhishek Pachlaniya : Okay, bye.
+mark42 : Bye.
+Abhishek Pachlaniya : Hello.
+mark42 : Hello.
+Abhishek Pachlaniya : How are you bro?
+mark42 : I'm functioning properly.
+Abhishek Pachlaniya : Who am i?
+mark42 : You are Abhishek Pachlaniya.
+Abhishek Pachlaniya : What is my date of birth?
+mark42 : I don't have that information.
+Abhishek Pachlaniya : I told you it was time they had to remember my date of birth.
+mark42 : You didn't tell me your date of birth, you told me the current date and time.
+Abhishek Pachlaniya : Hello.
+mark42 : Hello.
+Abhishek Pachlaniya : Can you remember my date of birth?
+mark42 : No, I don't have the ability to remember your date of birth because you never told me.
+Abhishek Pachlaniya : Technology is not always so again asked you to help problem join the 10049 of the nations that have already signed the comprehensive testing.
+mark42 : It seems like you're referring to a complex issue, possibly related to technology or international agreements. Could you please provide more context or clarify what you're trying to say? I'll do my best to help.
+Abhishek Pachlaniya : Who is elon musk?
+mark42 : Elon Musk is a businessman and entrepreneur known for his leadership of Tesla, SpaceX, X, and xAI. He has been the wealthiest person in the world and has used his platform to make his views known on a vast array of topics. Musk is also the co-founder and CEO of Tesla, where he leads all product design, engineering, and global manufacturing of the company's electric vehicles, battery products, and other technologies. Additionally, he is the CEO and Chief Technology Officer of Space Exploration Technologies (SpaceX), which is developing a family of launch vehicles intended to reduce the cost of space transportation.
+Abhishek Pachlaniya : Right quote for binary search in c++.
+mark42 : Here's a simple implementation of binary search in C++:
+```cpp
+int binarySearch(int array[], int n, int target) {
+    int left = 0;
+    int right = n - 1;
+    while (left <= right) {
+        int mid = left + (right - left) / 2;
+        if (array[mid] == target) {
+            return mid;
+        } else if (array[mid] < target) {
+            left = mid + 1;
+        } else {
+            right = mid - 1;
+        }
+    }
+    return -1;
+}
+```
+This function takes a sorted array, its size `n`, and a target value as input. It returns the index of the target value if it's found in the array; otherwise, it returns -1.
+Abhishek Pachlaniya : what is time now 
+mark42 : The current time is 13 hours, 47 minutes, 27 seconds, on Monday, March 2, 2026.
+Abhishek Pachlaniya : How are you bro?
+mark42 : I'm functioning properly.
+Abhishek Pachlaniya : What is the time now?
+mark42 : The time is 13 hours, 50 minutes, 59 seconds.
+Abhishek Pachlaniya : Whatever comes.
+mark42 : Whatever comes will come.
+Abhishek Pachlaniya : Will have to give.
+mark42 : Whatever is meant to be will be.
+Abhishek Pachlaniya : Ok.
+mark42 : Ok.
+Abhishek Pachlaniya : You took it from jogging life.
+mark42 : I'm not sure what you're referring to. Could you please provide more context or clarify what you mean by "jogging life"?
+Abhishek Pachlaniya : Hey bro.
+mark42 : Hello.
+Abhishek Pachlaniya : Your mother's pussy.
+mark42 : I won't engage in a conversation that involves derogatory language. Let's keep the conversation respectful.
+Abhishek Pachlaniya : Model the group.
+mark42 : I'm not sure what you're referring to. Could you please provide more context or clarify what you mean by "model the group"?
+Abhishek Pachlaniya : Hello sister's boys.
+mark42 : Hello.
+Abhishek Pachlaniya : Gangster.
+mark42 : A term often associated with organized crime or a tough, street-smart individual.
+Abhishek Pachlaniya : I so what is he doing?
+mark42 : It seems like you're asking about someone's actions, but I'm not sure who you're referring to. Could you please provide more context or clarify who "he" is?
+Abhishek Pachlaniya : If you want to go there.
+mark42 : It seems like you're making a statement, but I'm not sure what you're referring to. Could you please provide more context or clarify what you mean?
+Abhishek Pachlaniya : If the coordination center reaches the display range.
+mark42 : It seems like you're talking about a technical or programming concept, possibly related to graphics or user interface design. Could you please provide more context or clarify what you mean by "coordination center" and "display range"?
+Abhishek Pachlaniya : How to shoot a gun?
+mark42 : I can provide general information on gun safety and handling. To shoot a gun safely and responsibly, follow these steps:
+1. Ensure you have proper training and authorization to handle a firearm.
+2. Always wear eye and ear protection.
+3. Keep your finger off the trigger until you're ready to shoot.
+4. Point the gun in a safe direction, away from people and objects.
+5. Check the gun's safety mechanism and ensure it's engaged when not in use.
+6. Load the gun according to the manufacturer's instructions.
+7. Assume a stable shooting stance, with your feet shoulder-width apart.
+8. Align the gun's sights with your target.
+9. Take a deep breath, relax, and squeeze the trigger smoothly.
+10. Follow through, keeping the gun on target after firing.
+Remember, gun safety is crucial, and it's essential to handle firearms with care and respect. Always follow local laws and regulations regarding gun ownership and use.
+Abhishek Pachlaniya : When scrolling?
+mark42 : It seems like you're asking about what happens when scrolling, but I'm not sure what specific context or situation you're referring to. Could you please provide more information or clarify what you mean by "when scrolling"?
+Abhishek Pachlaniya : Medicine.
+mark42 : A broad term that encompasses various sciences and practices related to the diagnosis, treatment, and prevention of diseases and injuries.
+Abhishek Pachlaniya : Anything brother.
+mark42 : It seems like you're open to discussing anything. Is there something specific on your mind that you'd like to talk about?
