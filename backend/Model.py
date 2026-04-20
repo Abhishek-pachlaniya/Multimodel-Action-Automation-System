@@ -9,8 +9,9 @@ co = cohere.Client(api_key=CohereAPIKey)
 funcs = [
     "exit", "general", "realtime", "open", "close", "play",
     "generate image", "system", "content", "google search",
-    "youtube search", "reminder","start handgesture",
-    "stop handgesture"
+    "youtube search", "reminder", "start handgesture",
+    "stop handgesture", "send email", "send whatsapp",
+    "weather", "file management", "screenshot analysis"
 ]
 
 messages = []
@@ -32,6 +33,11 @@ You will decide whether a query is a 'general' query, a 'realtime' query, or is 
 -> Respond with 'content (topic)' if a query is asking to write any type of content like application, codes, emails or anything else about a specific topic but if the query is asking to write multiple types of content, respond with 'content 1st topic, content 2nd topic' and so on.
 -> Respond with 'google search (topic)' if a query is asking to search a specific topic on google but if the query is asking to search multiple topics on google, respond with 'google search 1st topic, google search 2nd topic' and so on.
 -> Respond with 'youtube search (topic)' if a query is asking to search a specific topic on youtube but if the query is asking to search multiple topics on youtube, respond with 'youtube search 1st topic, youtube search 2nd topic' and so on.
+-> Respond with 'send email (recipient and message)' if a query is asking to send an email.
+-> Respond with 'send whatsapp (recipient and message)' if a query is asking to send a whatsapp message.
+-> Respond with 'weather (city name)' if a query is asking about weather of any city.
+-> Respond with 'file management (task description)' if a query is asking to manage files like move, copy, delete, rename, organize files/folders.
+-> Respond with 'screenshot analysis' if a query is asking to analyze what's on the screen or take a screenshot and describe it.
 *** If the query is asking to perform multiple tasks like 'open facebook, telegram and close whatsapp' respond with 'open facebook, open telegram, close whatsapp' ***
 *** If the user is saying goodbye or wants to end the conversation like 'bye jarvis.' respond with 'exit'.***
 *** Respond with 'general (query)' if you can't decide the kind of query or if a query is asking to perform a task which is not mentioned above. ***
@@ -49,22 +55,144 @@ chatHistory = [
     {"role": "User", "message": "what is today's date and by the way remind me that I have a dancing performance on 5th aug at 11pm"},
     {"role": "Chatbot", "message": "general what is today's date, reminder 11:00pm 5th aug dancing performance"},
     {"role": "User", "message": "chat with me."},
-    {"role": "Chatbot", "message": "general chat with me."}
-]   
+    {"role": "Chatbot", "message": "general chat with me."},
+    {"role": "User", "message": "what's the weather in delhi?"},
+    {"role": "Chatbot", "message": "weather delhi"},
+    {"role": "User", "message": "send whatsapp to mom that I'll be late"},
+    {"role": "Chatbot", "message": "send whatsapp mom I'll be late"},
+    {"role": "User", "message": "what's on my screen?"},
+    {"role": "Chatbot", "message": "screenshot analysis"},
+]
+
+# ============================================================
+# ENHANCED FAST ROUTER
+# Zero latency for 90%+ queries — no API call needed
+# ============================================================
+
+# Keyword trie / prefix maps for instant local routing
+_OPEN_PREFIXES    = ("open ",)
+_CLOSE_PREFIXES   = ("close ",)
+_PLAY_PREFIXES    = ("play ",)
+_CONTENT_PREFIXES = ("content ", "write ", "draft ", "compose ")
+_GOOGLE_PREFIXES  = ("google search ", "search on google ")
+_YT_PREFIXES      = ("youtube search ", "search on youtube ", "search youtube ")
+_IMAGE_PREFIXES   = ("generate image ", "create image ", "make image ", "draw ")
+_WEATHER_PREFIXES = ("weather in ", "weather of ", "weather ")
+_FILE_PREFIXES    = ("move file", "delete file", "rename file", "organize file",
+                     "copy file", "move folder", "delete folder", "file management")
+_EMAIL_PREFIXES   = ("send email", "email to", "mail to")
+_WA_PREFIXES      = ("send whatsapp", "whatsapp to", "message on whatsapp")
+_SCREENSHOT_KW    = ("what's on my screen", "what is on my screen", "analyze screen",
+                     "screenshot analysis", "describe my screen", "read my screen")
+
+_EXACT_COMMANDS = {
+    "start handgesture": "start handgesture",
+    "stop handgesture":  "stop handgesture",
+    "exit": "exit", "bye": "exit", "quit": "exit",
+    "mute": "system mute", "unmute": "system unmute",
+}
+
+_VOLUME_PREFIXES = ("volume up", "volume down")
+
+_SYSTEM_KW = ("mute", "unmute", "volume")
+
 
 def FastRouter(prompt: str):
-    p_lower = prompt.lower().strip()
-    
-    # 0 Latency Local Checks for basic commands
-    if p_lower.startswith(("open ", "close ", "play ", "content ", "google search ", "youtube search ")):
-        return [p_lower]
-    if p_lower in ["start handgesture", "stop handgesture", "exit", "mute", "unmute"]:
-        return [p_lower]
-    if p_lower.startswith(("volume up", "volume down")):
-        return [f"system {p_lower}"]
-    
-    # Complex ones go to Cohere
+    """
+    Tries to classify prompt locally with zero latency.
+    Falls back to Cohere only for ambiguous / complex queries.
+    """
+    p = prompt.lower().strip()
+
+    # --- exact matches ---
+    if p in _EXACT_COMMANDS:
+        return [_EXACT_COMMANDS[p]]
+
+    # --- volume / system controls ---
+    for pfx in _VOLUME_PREFIXES:
+        if p.startswith(pfx):
+            return [f"system {p}"]
+
+    # --- open / close ---
+    for pfx in _OPEN_PREFIXES:
+        if p.startswith(pfx):
+            return [p]  # e.g. "open chrome"
+    for pfx in _CLOSE_PREFIXES:
+        if p.startswith(pfx):
+            return [p]
+
+    # --- play ---
+    for pfx in _PLAY_PREFIXES:
+        if p.startswith(pfx):
+            return [p]
+
+    # --- content writing ---
+    for pfx in _CONTENT_PREFIXES:
+        if p.startswith(pfx):
+            topic = p[len(pfx):]
+            return [f"content {topic}"]
+
+    # --- google / youtube search ---
+    for pfx in _GOOGLE_PREFIXES:
+        if p.startswith(pfx):
+            return [p]
+    for pfx in _YT_PREFIXES:
+        if p.startswith(pfx):
+            topic = p.split("youtube", 1)[-1].strip().lstrip("search").strip()
+            return [f"youtube search {topic}"]
+
+    # --- image generation ---
+    for pfx in _IMAGE_PREFIXES:
+        if p.startswith(pfx):
+            desc = p[len(pfx):]
+            return [f"generate image {desc}"]
+
+    # --- weather ---
+    for pfx in _WEATHER_PREFIXES:
+        if p.startswith(pfx):
+            city = p[len(pfx):].strip()
+            return [f"weather {city}"]
+
+    # --- file management ---
+    for kw in _FILE_PREFIXES:
+        if kw in p:
+            return [f"file management {prompt}"]
+
+    # --- email ---
+    for pfx in _EMAIL_PREFIXES:
+        if p.startswith(pfx):
+            return [f"send email {prompt[len(pfx):].strip()}"]
+
+    # --- whatsapp ---
+    for pfx in _WA_PREFIXES:
+        if p.startswith(pfx):
+            return [f"send whatsapp {prompt[len(pfx):].strip()}"]
+
+    # --- screenshot analysis ---
+    for kw in _SCREENSHOT_KW:
+        if kw in p:
+            return ["screenshot analysis"]
+
+    # --- reminder (simple pattern) ---
+    if any(w in p for w in ("remind me", "set a reminder", "reminder at", "alarm at")):
+        return FirstLayerDMM(prompt)  # Let Cohere parse the datetime properly
+
+    # --- handgesture ---
+    if "start" in p and "gesture" in p:
+        return ["start handgesture"]
+    if "stop" in p and "gesture" in p:
+        return ["stop handgesture"]
+
+    # --- greetings / farewells (instant general) ---
+    _greetings = ("hi", "hello", "hey", "good morning", "good evening",
+                  "good night", "thanks", "thank you", "okay", "ok", "sure",
+                  "got it", "nice", "cool", "great", "awesome")
+    if p in _greetings or p.rstrip("!.").strip() in _greetings:
+        return [f"general {prompt}"]
+
+    # --- everything else → Cohere ---
     return FirstLayerDMM(prompt)
+
 
 def FirstLayerDMM(prompt: str = "test"):
     try:
@@ -91,10 +219,12 @@ def FirstLayerDMM(prompt: str = "test"):
         if "(query)" in raw_output:
             return FirstLayerDMM(prompt=prompt)
         else:
-            return temp
+            return temp if temp else [f"general {prompt}"]
+
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Error in FirstLayerDMM: {e}")
         return [f"general {prompt}"]
+
 
 if __name__ == "__main__":
     while True:

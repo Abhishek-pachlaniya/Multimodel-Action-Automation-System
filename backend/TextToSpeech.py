@@ -1,80 +1,72 @@
-# === Import Required Libraries ===
-import pygame                              # For handling audio playback
-import random                              # For random selection of responses
-import asyncio                             # For asynchronous operations
-import edge_tts                            # For text-to-speech conversion
-import os                                  # For file handling
-from dotenv import dotenv_values           # For reading environment variables
+import pygame
+import random
+import asyncio
+import edge_tts
+import os
+from dotenv import dotenv_values
 
-# === Load Environment Variables ===
-env_vars = dotenv_values(".env")
-AssistantVoice = env_vars.get("AssistantVoice")  # Voice name from .env
+env_vars       = dotenv_values(".env")
+AssistantVoice = env_vars.get("AssistantVoice")
 
 
-# === Asynchronous Function to Convert Text to Audio File ===
 async def TextToAudioFile(text) -> None:
-   file_path = r"data\speech.mp3"  # Path where the speech file will be saved
+    file_path = r"data\speech.mp3"
+    os.makedirs("data", exist_ok=True)
 
-   # If file already exists, remove it
-   if os.path.exists(file_path):
-       os.remove(file_path)
+    if os.path.exists(file_path):
+        os.remove(file_path)
 
-   # Create communicate object for TTS
-   communicate = edge_tts.Communicate(
-       text,
-       AssistantVoice,
-       pitch="+5Hz",
-       rate="+13%"
-   )
-
-   # Save generated speech as MP3 file
-   await communicate.save(file_path)
+    communicate = edge_tts.Communicate(
+        text,
+        AssistantVoice,
+        pitch="+5Hz",
+        rate="+13%"
+    )
+    await communicate.save(file_path)
 
 
-# === Text-to-Speech Playback Function ===
 def TTS(Text, func=lambda r=None: True):
-   while True:
-       try:
-           # Convert text to speech asynchronously
-           asyncio.run(TextToAudioFile(Text))
+    while True:
+        try:
+            asyncio.run(TextToAudioFile(Text))
 
-           # Initialize pygame mixer
-           pygame.mixer.init()
+            # -------------------------------------------------------
+            # FIX: Only init if not already initialized
+            # -------------------------------------------------------
+            if not pygame.mixer.get_init():
+                pygame.mixer.init()
 
-           # Load and play generated speech
-           pygame.mixer.music.load(r"data\speech.mp3")
-           pygame.mixer.music.play()
+            pygame.mixer.music.load(r"data\speech.mp3")
+            pygame.mixer.music.play()
 
-           # Wait until audio finishes or external function stops it
-           while pygame.mixer.music.get_busy():
-               if func() == False:
-                   break
-               pygame.time.Clock().tick(10)
+            while pygame.mixer.music.get_busy():
+                if func() == False:
+                    break
+                pygame.time.Clock().tick(10)
 
-           return True
+            return True
 
-       except Exception as e:
-           print(f"Error in TTS: {e}")
+        except Exception as e:
+            print(f"Error in TTS: {e}")
+            return False  # Don't infinite loop on persistent error
 
-       finally:
-           try:
-               # Signal end of TTS
-               func(False)
+        finally:
+            try:
+                func(False)
+                # -------------------------------------------------------
+                # FIX: Only stop/quit if mixer is actually initialized
+                # -------------------------------------------------------
+                if pygame.mixer.get_init():
+                    pygame.mixer.music.stop()
+                    pygame.mixer.quit()
+            except Exception as e:
+                print(f"Error in TTS finally block: {e}")
 
-               # Stop and quit mixer
-               pygame.mixer.music.stop()
-               pygame.mixer.quit()
 
-           except Exception as e:
-               print(f"Error in finally block: {e}")
-
-
-# === Function to Manage Long Text and Add Extra Response ===
 def TextToSpeech(Text, func=lambda r=None: True):
-   Data = str(Text).split(".")  # Split text into sentences
+    Data = str(Text).split(".")
 
-   # Predefined responses for long text
-   responses = [
+    responses = [
         "The rest of the result has been printed to the chat screen, kindly check it out sir.",
         "The rest of the text is now on the chat screen, sir, please check it.",
         "You can see the rest of the text on the chat screen, sir.",
@@ -97,15 +89,12 @@ def TextToSpeech(Text, func=lambda r=None: True):
         "Sir, look at the chat screen for the complete answer."
     ]
 
-
-   # If text is long (>4 sentences and >250 characters)
-   if len(Data) > 4 and len(Text) > 250:
-       TTS(".".join(Text.split(".")[:2]) + "." + random.choice(responses), func)
-   else:
-       TTS(Text, func)
+    if len(Data) > 4 and len(Text) > 250:
+        TTS(".".join(Text.split(".")[:2]) + "." + random.choice(responses), func)
+    else:
+        TTS(Text, func)
 
 
-# === Main Execution ===
 if __name__ == "__main__":
-   while True:
-       TextToSpeech(input("Enter the text: "))
+    while True:
+        TextToSpeech(input("Enter the text: "))
