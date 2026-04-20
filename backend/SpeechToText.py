@@ -1,145 +1,80 @@
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
+import speech_recognition as sr
+from groq import Groq
 from dotenv import dotenv_values
 import os
-import mtranslate as mt
 
-# Load environment variables from the .env file.
+# === Load environment variables ===
 env_vars = dotenv_values(".env")
-# Get the input language setting from the environment variables.
-InputLanguage = env_vars.get("InputLanguage")
+client = Groq(api_key=env_vars.get("GroqAPIKey"))
+InputLanguage = env_vars.get("InputLanguage", "en") 
 
-# Define the HTML code for the speech recognition interface.
-HtmlCode = '''<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>Speech Recognition</title>
-</head>
-<body>
-    <button id="start" onclick="startRecognition()">Start Recognition</button>
-    <button id="end" onclick="stopRecognition()">Stop Recognition</button>
-    <p id="output"></p>
-    <script>
-        const output = document.getElementById('output');
-        let recognition;
-
-        function startRecognition() {
-            recognition = new webkitSpeechRecognition() || new SpeechRecognition();
-            recognition.lang = '';
-            recognition.continuous = true;
-
-            recognition.onresult = function(event) {
-                const transcript = event.results[event.results.length - 1][0].transcript;
-                output.textContent += transcript;
-            };
-
-            recognition.onend = function() {
-                recognition.start();
-            };
-            recognition.start();
-        }
-
-        function stopRecognition() {
-            recognition.stop();
-            output.innerHTML = "";
-        }
-    </script>
-</body>
-</html>'''
-
-# Replace the language setting in the HTML code with the input language from the environment variables.
-HtmlCode = str(HtmlCode).replace("recognition.lang = '';", f"recognition.lang = '{InputLanguage}';")
-
-# Write the modified HTML code to a file.
-with open("Data/Voice.html", "w") as f:
-    f.write(HtmlCode)
-
-# Get the current working directory.
-current_dir = os.getcwd()
-# Generate the file path for the HTML file.
-Link = f"{current_dir}/Data/Voice.html"
-
-# Set Chrome options for the WebDriver.
-chrome_options = Options()
-user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.142.86 Safari/537.36"
-chrome_options.add_argument(f'user-agent={user_agent}')
-chrome_options.add_argument("--use-fake-ui-for-media-stream")
-chrome_options.add_argument("--use-fake-device-for-media-stream")
-chrome_options.add_argument("--headless")
-
-# Initialize the Chrome WebDriver using ChromeDriverManager.
-service = Service(ChromeDriverManager().install())
-driver = webdriver.Chrome(service=service, options=chrome_options)
-
-# Define the path for temporary files.
-TempDirPath = rf"{current_dir}/Frontend/Files"
-
-# Function to set the assistant's status by writing it to a file.
-def SetAssistantStatus(Status):
-    with open(rf'{TempDirPath}/Status.data', "w", encoding='utf-8') as file:
-        file.write(Status)
-
-# Function to modify a query to ensure proper punctuation and formatting.
+# === Function to properly punctuate the query ===
 def QueryModifier(Query):
     new_query = Query.lower().strip()
     query_words = new_query.split()
-    question_words = ["how", "what", "who", "where", "when", "why", "which", "whose", "whom", "can you", "what's", "where's", "how's","can "]
+    question_words = ["how", "what", "who", "where", "when", "why", "which", "whose", "whom", "can", "what's", "where's", "how's"]
 
-    # Check if the query is a question and add a question mark if necessary.
-    if any(word + " " in new_query for word in question_words):
-        if query_words[-1][-1] in ['.', '?', '!']:
-            new_query = new_query[:-1] + "?"
-        else:
+    if any(word in query_words for word in question_words):
+        if not new_query.endswith(('.', '?', '!')):
             new_query += "?"
     else:
-        # Add a period if the query is not a question.
-        if query_words[-1][-1] in ['.', '?', '!']:
-            new_query = new_query[:-1] + "."
-        else:
+        if not new_query.endswith(('.', '?', '!')):
             new_query += "."
 
     return new_query.capitalize()
 
-# Function to translate text into English using the mtranslate library
-def UniversalTranslator(Text):
-    english_translation = mt.translate(Text, "en", "auto")
-    return english_translation.capitalize()
-
-# Function to perform speech recognition using the WebDriver.
+# === Superfast Speech to Text using Groq Whisper API ===
 def SpeechRecognition():
-    # Open the HTML file in the browser.
-    driver.get("file:///" + Link)
-    # Start speech recognition by clicking the start button.
-    driver.find_element(by=By.ID, value="start").click()
-
-    while True:
+    r = sr.Recognizer()
+    with sr.Microphone() as source:
+        r.adjust_for_ambient_noise(source, duration=0.2)
+        r.pause_threshold = 0.5 
+        print("\nListening...")
+        
         try:
-            # Get the recognized text from the HTML output element.
-            Text = driver.find_element(by=By.ID, value="output").text
-
-            if Text:
-                # Stop recognition by clicking the stop button.
-                driver.find_element(by=By.ID, value="end").click()
-                            # If the input language is English, return the modified query.
-                if InputLanguage.lower() == "en" or "en" in InputLanguage.lower():
-                    return QueryModifier(Text)
-                else:
-                    # If the input language is not English, translate the text and return it.
-                    if Text.lower().startswith(("youtube search","play")):
-                        return QueryModifier(Text)
-                    else:
-                        SetAssistantStatus("Translating...")
-                        return QueryModifier(UniversalTranslator(Text))
-
+            audio = r.listen(source, timeout=5, phrase_time_limit=10)
+        except sr.WaitTimeoutError:
+            return ""
         except Exception as e:
-            pass
+            print(f"Microphone error: {e}")
+            return ""
 
-# Main execution block.
+    temp_file = "temp_audio.wav"
+    with open(temp_file, "wb") as f:
+        f.write(audio.get_wav_data())
+
+    try:
+        with open(temp_file, "rb") as file:
+            transcription = client.audio.transcriptions.create(
+                file=(temp_file, file.read()),
+                model="whisper-large-v3",
+                language="en" 
+            )
+        
+        if os.path.exists(temp_file):
+            os.remove(temp_file)
+            
+        text = transcription.text.strip()
+        
+        # === WHISPER HALLUCINATION FILTER ===
+        # Ye filter background noise se banne wale fake words ko block karega
+        ignore_phrases = ["thank you", "thank you.", "thanks", "thanks.", "hello", "hello.", "hi", "hi.", "bye", "bye."]
+        if text.lower() in ignore_phrases or len(text) <= 3:
+            return ""
+        # ====================================
+
+        if text:
+            return QueryModifier(text)
+        return ""
+        
+    except Exception as e:
+        print(f"STT Error: {e}")
+        if os.path.exists(temp_file):
+            os.remove(temp_file)
+        return ""
+
 if __name__ == "__main__":
     while True:
-        # Continuously perform speech recognition and print the recognized text.
         Text = SpeechRecognition()
-        print(Text)
+        if Text:
+            print("Recognized:", Text)

@@ -108,15 +108,18 @@ def YouTubeSearch(Topic):
 def PlayYoutube(query):
     global YouTubeMode
 
-    search_url = f"https://www.youtube.com/results?search_query={query}"
-    webbrowser.open(search_url, new=0)
-    time.sleep(5)
+    # Agar user "play youtube [song name]" bolta hai, toh "youtube" word hata do
+    # taaki exact gaana search ho
+    clean_query = query.replace("youtube", "").strip()
 
-    pyautogui.press("tab", presses=3)
-    pyautogui.press("enter")
-
-    YouTubeMode = True
-    return True
+    # Ye seedha first video play kar dega bina kisi keyboard shortcut ke
+    try:
+        playonyt(clean_query)
+        YouTubeMode = True
+        return True
+    except Exception as e:
+        print(f"Error playing youtube video: {e}")
+        return False
 
 def OpenApp(app, sess=requests.session()):
     app = app.lower()

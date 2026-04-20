@@ -99,6 +99,7 @@ while True:
             Data: str = f.read()
 
         Prompt, Status = Data.split(",")
+        Prompt = Prompt.replace("generate image ", "").strip()
 
         # If the status indicates an image generation request
         if Status == "True":
@@ -107,12 +108,12 @@ while True:
 
             # Reset the status in the file after generating images
             with open(r"frontend\files\ImageGeneration.data", "w") as f:
-                f.write("False,False")
+                f.write("None,False")
 
             break  # Exit the loop after processing the request
 
         else:
             sleep(1)  # Wait for 1 second before checking again
 
-    except:
-        pass
+    except Exception as e:
+       print("Error:", e)

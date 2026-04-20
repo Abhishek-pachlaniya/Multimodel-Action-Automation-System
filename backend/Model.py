@@ -1,15 +1,11 @@
-# === Import Required Libraries ===
-import cohere                              # For using Cohere API
-from rich import print                     # For rich terminal output
+import cohere
+from rich import print
 from dotenv import dotenv_values
-# === Load Environment Variables ===
+
 env_vars = dotenv_values(".env")
-CohereAPIKey = env_vars.get("CohereAPIKey")   # Load the API key from environment
-# print("key =" ,CohereAPIKey)
-# === Initialize the Cohere Client ===
+CohereAPIKey = env_vars.get("CohereAPIKey")
 co = cohere.Client(api_key=CohereAPIKey)
 
-# === Define Recognized Function Keywords ===
 funcs = [
     "exit", "general", "realtime", "open", "close", "play",
     "generate image", "system", "content", "google search",
@@ -17,10 +13,8 @@ funcs = [
     "stop handgesture"
 ]
 
-# === Initialize Message History ===
 messages = []
 
-# === Define a Preamble for Instruction ===
 preamble = """
 You are a very accurate Decision-Making Model, which decides what kind of a query is given to you.
 You will decide whether a query is a 'general' query, a 'realtime' query, or is asking to perform any task or automation like 'open facebook, instagram', 'can you write a application and open it in notepad'
@@ -43,8 +37,7 @@ You will decide whether a query is a 'general' query, a 'realtime' query, or is 
 *** Respond with 'general (query)' if you can't decide the kind of query or if a query is asking to perform a task which is not mentioned above. ***
 """
 
-# === Define a Chat History with Predefined Interactions ===
-ChatHistory = [
+chatHistory = [
     {"role": "User", "message": "how are you?"},
     {"role": "Chatbot", "message": "general how are you?"},
     {"role": "User", "message": "do you like pizza?"},
@@ -59,43 +52,51 @@ ChatHistory = [
     {"role": "Chatbot", "message": "general chat with me."}
 ]   
 
-# === Define the Decision-Making Function ===
+def FastRouter(prompt: str):
+    p_lower = prompt.lower().strip()
+    
+    # 0 Latency Local Checks for basic commands
+    if p_lower.startswith(("open ", "close ", "play ", "content ", "google search ", "youtube search ")):
+        return [p_lower]
+    if p_lower in ["start handgesture", "stop handgesture", "exit", "mute", "unmute"]:
+        return [p_lower]
+    if p_lower.startswith(("volume up", "volume down")):
+        return [f"system {p_lower}"]
+    
+    # Complex ones go to Cohere
+    return FirstLayerDMM(prompt)
+
 def FirstLayerDMM(prompt: str = "test"):
-    response = co.chat(
-        model='command-r-08-2024',  # or try 'command-r-plus'
-        message=prompt,
-        temperature=0.0,
-        chat_history=ChatHistory,
-        prompt_truncation='OFF',
-        connectors=[],
-        preamble=preamble
-    )
+    try:
+        response = co.chat(
+            model='command-r-08-2024',
+            message=prompt,
+            temperature=0.0,
+            chat_history=chatHistory,
+            prompt_truncation='OFF',
+            connectors=[],
+            preamble=preamble
+        )
 
-    raw_output = response.text
-    # print("[1] Raw output:", raw_output)
+        raw_output = response.text
+        result = raw_output.replace("\n", "").split(",")
+        result = [i.strip() for i in result]
 
-    # Clean and split
-    result = raw_output.replace("\n", "").split(",")
-    result = [i.strip() for i in result]
-    # print("[2] After split & strip:", result)
+        temp = []
+        for task in result:
+            for func in funcs:
+                if task.startswith(func + " ") or task == func:
+                    temp.append(task)
 
-    temp = []
-    for task in result:
-        for func in funcs:
-            if task.startswith(func + " ") or task == func:
-                temp.append(task)
+        if "(query)" in raw_output:
+            return FirstLayerDMM(prompt=prompt)
+        else:
+            return temp
+    except Exception as e:
+        print(f"Error: {e}")
+        return [f"general {prompt}"]
 
-    # print("[3] Filtered tasks:", temp)
-
-    if "(query)" in raw_output:
-        return FirstLayerDMM(prompt=prompt)
-    else:
-        return temp
-
-
-
-# === Main Program ===
 if __name__ == "__main__":
     while True:
         user_input = input(">>> ")
-        print(FirstLayerDMM(user_input))
+        print(FastRouter(user_input))
